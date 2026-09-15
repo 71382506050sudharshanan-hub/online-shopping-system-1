@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart - Minkart{% endblock %}
+
+{% block content %}
+
+<div class="page-header-spacing-lg">
+    <h1 class="section-title">Your Shopping Cart</h1>
+    <p class="section-subtitle">Review your selected items before proceeding to checkout</p>
+</div>
+
+{% if cart['items'] %}
+<div class="cart-layout">
+    <!-- Items Table Area -->
+    <div>
+        <div class="cart-table-wrap">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart['items'] %}
+                    <tr>
+                        <td>
+                            <div class="cart-item-info">
+                                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="cart-item-thumb">
+                                <div>
+                                    <a href="{{ url_for('product_detail', product_id=item.product.id) }}" class="cart-product-title-link">
+                                        {{ item.product.name }}
+                                    </a>
+                                    <div class="cart-brand-meta">Brand: {{ item.product.brand }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-semibold">₹{{ "%.2f"|format(item.product.price) }}</td>
+                        <td>
+                            <form action="{{ url_for('update_cart', product_id=item.product.id) }}" method="POST" class="cart-update-form">
+                                <label for="quantity-{{ item.product.id }}" class="visually-hidden">Quantity for {{ item.product.name }}</label>
+                                <input id="quantity-{{ item.product.id }}" type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="cart-qty-input" aria-label="Quantity for {{ item.product.name }}">
+                                <button type="submit" class="btn btn-outline btn-sm" title="Update Quantity">Update</button>
+                            </form>
+                        </td>
+                        <td class="cart-subtotal-val">₹{{ "%.2f"|format(item.subtotal) }}</td>
+                        <td>
+                            <a href="{{ url_for('remove_from_cart', product_id=item.product.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Remove this item from cart?');">
+                                Remove
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cart-table-actions">
+            <a href="{{ url_for('products') }}" class="btn btn-outline">&larr; Continue Shopping</a>
+            <a href="{{ url_for('clear_cart') }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to clear your cart?');">Clear Entire Cart</a>
+        </div>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <aside class="summary-card">
+        <h3 class="summary-title">Order Summary</h3>
+
+        <div class="summary-row">
+            <span>Items Subtotal</span>
+            <span>₹{{ "%.2f"|format(cart.subtotal) }}</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Shipping</span>
+            <span>
+                {% if cart.shipping == 0.0 %}
+                    <strong class="shipping-free-badge">FREE</strong>
+                {% else %}
+                    ₹{{ "%.2f"|format(cart.shipping) }}
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="shipping-promo-note">
+            {% if cart.subtotal < 50.0 %}
+                Add ₹{{ "%.2f"|format(50.0 - cart.subtotal) }} more to qualify for <strong>FREE Shipping</strong>!
+            {% else %}
+                🎉 Congratulations! You unlocked <strong>FREE Shipping</strong>.
+            {% endif %}
+        </div>
+
+        <div class="summary-row total">
+            <span>Grand Total</span>
+            <span>₹{{ "%.2f"|format(cart.grand_total) }}</span>
+        </div>
+
+        <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-block btn-checkout-lg">
+            Proceed to Checkout &rarr;
+        </a>
+    </aside>
+</div>
+{% else %}
+<div class="empty-card-container">
+    <div class="empty-card-icon">🛒</div>
+    <h2 class="empty-card-title">Your Cart is Empty</h2>
+    <p class="empty-card-desc">Looks like you haven't added anything to your cart yet. Explore our wide collection of items and find something you love!</p>
+    <a href="{{ url_for('products') }}" class="btn btn-primary">Start Shopping Now</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Placed Successfully #{{ order.id }} - Minkart{% endblock %}
+
+{% block content %}
+
+<div class="success-card">
+    <div class="success-icon-wrap">✓</div>
+    <h1 class="success-title">
+        Order Placed Successfully!
+    </h1>
+    <p class="success-subtitle">
+        Thank you for your order, <strong>{{ order.customer_name }}</strong>! We've sent a confirmation email to <strong>{{ order.email }}</strong>.
+    </p>
+
+    <!-- Order Metadata Box -->
+    <div class="order-meta-box">
+        <div>
+            <div class="order-meta-label">Order ID</div>
+            <div class="order-meta-value-id">#MK-ORD-{{ order.id }}</div>
+        </div>
+
+        <div>
+            <div class="order-meta-label">Order Date</div>
+            <div class="order-meta-value-text">{{ order.created_at }}</div>
+        </div>
+
+        <div>
+            <div class="order-meta-label">Payment Method</div>
+            <div class="order-meta-value-text">{{ order.payment_method }}</div>
+        </div>
+
+        <div>
+            <div class="order-meta-label">Order Status</div>
+            <div class="order-meta-value-status">{{ order.order_status }}</div>
+        </div>
+    </div>
+
+    <!-- Items Summary Table -->
+    <div class="order-breakdown-section">
+        <h3 class="order-breakdown-title">
+            Order Items Breakdown
+        </h3>
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Unit Price</th>
+                    <th>Qty</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="text-semibold">{{ item.product_name }}</td>
+                    <td>₹{{ "%.2f"|format(item.price) }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="cart-subtotal-val">₹{{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="order-total-row">
+            Total Paid: <span class="order-total-amount">₹{{ "%.2f"|format(order.total_amount) }}</span>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="order-actions-row">
+        <button onclick="window.print();" class="btn btn-outline">🖨️ Print Order Receipt</button>
+        <a href="{{ url_for('products') }}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+</div>
+
+{% endblock %}
