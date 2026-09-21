@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.git/
+.gitignore
+venv/
+env/
+.env
+database/*.db
+online-shopping-ci-cd.zip

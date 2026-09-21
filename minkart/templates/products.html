@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalog - Minkart Online Shopping{% endblock %}
+
+{% block content %}
+
+<div class="page-header-spacing">
+    <h1 class="section-title">Product Catalog</h1>
+    <p class="section-subtitle">Browse through our complete catalog of high-quality products</p>
+</div>
+
+<div class="catalog-layout">
+    <!-- Filter Sidebar -->
+    <aside class="filter-sidebar">
+        <form action="{{ url_for('products') }}" method="GET" id="catalog-filter-form">
+            
+            {% if selected_query %}
+                <input type="hidden" name="q" value="{{ selected_query }}">
+            {% endif %}
+
+            <div class="filter-group">
+                <label class="filter-title" for="filter-category">Category</label>
+                <select id="filter-category" name="category" class="filter-select" onchange="this.form.submit();">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-title" for="filter-brand">Brand</label>
+                <select id="filter-brand" name="brand" class="filter-select" onchange="this.form.submit();">
+                    <option value="">All Brands</option>
+                    {% for b in brands %}
+                        <option value="{{ b }}" {% if selected_brand == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-title">Price Range (₹)</span>
+                <div class="price-range-inputs">
+                    <label for="filter-min-price" class="visually-hidden">Minimum Price</label>
+                    <input type="number" id="filter-min-price" name="min_price" class="filter-input" placeholder="Min" value="{{ selected_min_price }}" min="0" aria-label="Minimum Price">
+                    <span>-</span>
+                    <label for="filter-max-price" class="visually-hidden">Maximum Price</label>
+                    <input type="number" id="filter-max-price" name="max_price" class="filter-input" placeholder="Max" value="{{ selected_max_price }}" min="0" aria-label="Maximum Price">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-title" for="filter-min-rating">Minimum Rating</label>
+                <select id="filter-min-rating" name="min_rating" class="filter-select" onchange="this.form.submit();">
+                    <option value="">Any Rating</option>
+                    <option value="4.5" {% if selected_min_rating == '4.5' %}selected{% endif %}>4.5★ & above</option>
+                    <option value="4.0" {% if selected_min_rating == '4.0' %}selected{% endif %}>4.0★ & above</option>
+                    <option value="3.5" {% if selected_min_rating == '3.5' %}selected{% endif %}>3.5★ & above</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-title" for="filter-sort">Sort By</label>
+                <select id="filter-sort" name="sort" class="filter-select" onchange="this.form.submit();">
+                    <option value="relevance" {% if selected_sort == 'relevance' %}selected{% endif %}>Relevance</option>
+                    <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Top Rated</option>
+                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+                    <option value="discount" {% if selected_sort == 'discount' %}selected{% endif %}>Biggest Discounts</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+            <a href="{{ url_for('products') }}" class="btn btn-outline btn-block catalog-reset-btn">Reset Filters</a>
+        </form>
+    </aside>
+
+    <!-- Product Grid Area -->
+    <main>
+        <div class="catalog-header">
+            <div class="results-count">
+                Showing <strong>{{ total_results }}</strong> product(s)
+                {% if selected_query %} for "<em>{{ selected_query }}</em>"{% endif %}
+                {% if selected_category %} in <em>{{ selected_category }}</em>{% endif %}
+            </div>
+        </div>
+
+        {% if products %}
+            <div class="product-grid">
+                {% for p in products %}
+                    <div class="product-card">
+                        <div class="product-image-wrap">
+                            {% if p.discount_percentage > 0 %}
+                                <span class="badge-discount">-{{ p.discount_percentage }}%</span>
+                            {% endif %}
+                            <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                                <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+                            </a>
+                        </div>
+                        <div class="product-details">
+                            <span class="product-brand">{{ p.brand }}</span>
+                            <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                                <h3 class="product-title">{{ p.name }}</h3>
+                            </a>
+                            <div class="rating-row">
+                                <span class="stars">★</span>
+                                <span class="rating-score">{{ p.rating }}</span>
+                                <span class="review-count">({{ p.review_count }})</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="current-price">₹{{ "%.2f"|format(p.price) }}</span>
+                                {% if p.original_price and p.original_price > p.price %}
+                                    <span class="original-price">₹{{ "%.2f"|format(p.original_price) }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-actions">
+                                <form action="{{ url_for('add_to_cart', product_id=p.id) }}" method="POST" class="ajax-add-to-cart">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary btn-sm btn-block" {% if p.stock == 0 %}disabled{% endif %}>
+                                        {% if p.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+                                    </button>
+                                </form>
+                                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-sm">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="catalog-empty-card">
+                <div class="catalog-empty-icon">🔍</div>
+                <h3 class="catalog-empty-title">No Products Found</h3>
+                <p class="catalog-empty-desc">We couldn't find any products matching your search criteria. Try clearing some filters or searching for something else.</p>
+                <a href="{{ url_for('products') }}" class="btn btn-primary">Clear Filters & View All</a>
+            </div>
+        {% endif %}
+    </main>
+</div>
+
+{% endblock %}
