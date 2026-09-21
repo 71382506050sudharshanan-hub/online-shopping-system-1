@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Minkart{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<!-- Breadcrumbs -->
+<div class="breadcrumb-trail">
+    <a href="{{ url_for('index') }}">Home</a> / 
+    <a href="{{ url_for('products', category=product.category) }}">{{ product.category }}</a> / 
+    <span class="breadcrumb-current">{{ product.name }}</span>
+</div>
+
+<div class="product-detail-card">
+    <div class="detail-grid">
+        <!-- Product Image Gallery -->
+        <div class="detail-gallery">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" id="main-product-img">
+        </div>
+
+        <!-- Product Specs & Purchase Box -->
+        <div class="detail-meta">
+            <span class="product-brand">{{ product.brand }}</span>
+            <h1>{{ product.name }}</h1>
+
+            <div class="rating-row detail-rating-row">
+                <span class="stars stars-lg">★</span>
+                <span class="rating-score rating-score-lg">{{ product.rating }}</span>
+                <span class="review-count">({{ product.review_count }} verified customer reviews)</span>
+            </div>
+
+            <div class="price-row detail-price-row">
+                <span class="current-price current-price-lg">₹{{ "%.2f"|format(product.price) }}</span>
+                {% if product.original_price and product.original_price > product.price %}
+                    <span class="original-price original-price-lg">₹{{ "%.2f"|format(product.original_price) }}</span>
+                    <span class="badge-discount badge-discount-inline">Save {{ product.discount_percentage }}%</span>
+                {% endif %}
+            </div>
+
+            <!-- Stock Status -->
+            {% if product.stock > 0 %}
+                <div class="stock-status stock-in">
+                    ✓ In Stock ({{ product.stock }} units available)
+                </div>
+            {% else %}
+                <div class="stock-status stock-out">
+                    ✗ Out of Stock
+                </div>
+            {% endif %}
+
+            <p class="detail-desc-text">
+                {{ product.description }}
+            </p>
+
+            {% if product.stock > 0 %}
+                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="detail-form">
+                    <div class="qty-control-row">
+                        <label for="product-qty-input" class="form-label qty-form-label">Quantity:</label>
+                        <div class="qty-control">
+                            <button type="button" class="qty-btn btn-minus" aria-label="Decrease quantity">-</button>
+                            <input type="number" id="product-qty-input" name="quantity" class="qty-input" value="1" min="1" max="{{ product.stock }}" aria-label="Product quantity">
+                            <button type="button" class="qty-btn btn-plus" aria-label="Increase quantity">+</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-btn-wrap">
+                        <button type="submit" class="btn btn-primary btn-block btn-padding-lg">Add to Shopping Cart</button>
+                    </div>
+                </form>
+            {% else %}
+                <button class="btn btn-outline btn-block btn-padding-lg" disabled>Currently Unavailable</button>
+            {% endif %}
+
+            <div class="product-specs-list">
+                <div>SKU: <strong class="spec-strong">{{ product.sku }}</strong></div>
+                <div>Category: <strong class="spec-strong">{{ product.category }}</strong></div>
+                <div>Brand: <strong class="spec-strong">{{ product.brand }}</strong></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Products -->
+{% if related_products %}
+<section class="related-section">
+    <div class="section-header">
+        <h2 class="section-title">Similar Products You Might Like</h2>
+    </div>
+
+    <div class="product-grid">
+        {% for p in related_products %}
+            <div class="product-card">
+                <div class="product-image-wrap">
+                    {% if p.discount_percentage > 0 %}
+                        <span class="badge-discount">-{{ p.discount_percentage }}%</span>
+                    {% endif %}
+                    <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                        <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+                    </a>
+                </div>
+                <div class="product-details">
+                    <span class="product-brand">{{ p.brand }}</span>
+                    <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                        <h3 class="product-title">{{ p.name }}</h3>
+                    </a>
+                    <div class="rating-row">
+                        <span class="stars">★</span>
+                        <span class="rating-score">{{ p.rating }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="current-price">₹{{ "%.2f"|format(p.price) }}</span>
+                    </div>
+                    <div class="product-actions">
+                        <form action="{{ url_for('add_to_cart', product_id=p.id) }}" method="POST" class="ajax-add-to-cart">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary btn-sm btn-block">Add to Cart</button>
+                        </form>
+                        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-sm">Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

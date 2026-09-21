@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Minkart{% endblock %}
+
+{% block content %}
+
+<div class="page-header-spacing-lg">
+    <h1 class="section-title">Checkout & Payment</h1>
+    <p class="section-subtitle">Please enter your shipping address and select a payment option</p>
+</div>
+
+<div class="checkout-layout">
+    <!-- Form Card -->
+    <div class="checkout-form-card">
+        <form action="{{ url_for('checkout') }}" method="POST" id="checkout-form">
+            <h3 class="checkout-section-header">
+                1. Customer & Delivery Address
+            </h3>
+
+            <div class="form-grid checkout-form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label" for="customer_name">Full Name *</label>
+                    <input type="text" id="customer_name" name="customer_name" class="form-control" required placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-control" required placeholder="john@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" required placeholder="+1 (555) 000-0000">
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label" for="address">Street Address *</label>
+                    <input type="text" id="address" name="address" class="form-control" required placeholder="123 Main Street, Apt 4B">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="city">City *</label>
+                    <input type="text" id="city" name="city" class="form-control" required placeholder="New York">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="state">State / Province *</label>
+                    <input type="text" id="state" name="state" class="form-control" required placeholder="NY">
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label" for="postal_code">Postal Code *</label>
+                    <input type="text" id="postal_code" name="postal_code" class="form-control" required placeholder="10001">
+                </div>
+            </div>
+
+            <h3 class="checkout-section-header">
+                2. Select Mock Payment Method
+            </h3>
+
+            <div class="payment-options checkout-payment-options">
+                <label class="payment-option-label">
+                    <input type="radio" name="payment_method" value="Cash on Delivery" checked>
+                    <span>💵 Cash on Delivery</span>
+                </label>
+                <label class="payment-option-label">
+                    <input type="radio" name="payment_method" value="Credit/Debit Card (Mock)">
+                    <span>💳 Credit / Debit Card (Mock)</span>
+                </label>
+                <label class="payment-option-label">
+                    <input type="radio" name="payment_method" value="UPI (Mock)">
+                    <span>📱 UPI (Mock)</span>
+                </label>
+                <label class="payment-option-label">
+                    <input type="radio" name="payment_method" value="Net Banking (Mock)">
+                    <span>🏦 Net Banking (Mock)</span>
+                </label>
+            </div>
+
+            <div class="checkout-security-notice">
+                🔒 <strong>DevOps MVP Security Notice:</strong> This platform uses a simulated mock payment gateway. No real sensitive financial credentials or card details are requested or recorded.
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block checkout-submit-btn">
+                Place Order Now
+            </button>
+        </form>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <aside class="summary-card">
+        <h3 class="summary-title">Items in Order ({{ cart.total_items }})</h3>
+
+        <div class="checkout-items-scroll">
+            {% for item in cart['items'] %}
+                <div class="checkout-item-row">
+                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="checkout-item-thumb">
+                    <div class="checkout-item-meta">
+                        <div class="checkout-item-name">{{ item.product.name }}</div>
+                        <div class="checkout-item-subtext">Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.product.price) }}</div>
+                    </div>
+                    <div class="checkout-item-total">₹{{ "%.2f"|format(item.subtotal) }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹{{ "%.2f"|format(cart.subtotal) }}</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Shipping</span>
+            <span>
+                {% if cart.shipping == 0.0 %}
+                    <strong class="shipping-free-badge">FREE</strong>
+                {% else %}
+                    ₹{{ "%.2f"|format(cart.shipping) }}
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="summary-row total">
+            <span>Total Payable</span>
+            <span>₹{{ "%.2f"|format(cart.grand_total) }}</span>
+        </div>
+    </aside>
+</div>
+
+{% endblock %}
