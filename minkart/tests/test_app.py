@@ -148,6 +148,6 @@ def test_checkout_and_order_creation(client):
         assert order_item['product_id'] == 1
         assert order_item['quantity'] == 2
 
-        # Check stock deduction (15 - 2 = 13)
+        # Check stock deduction
         product = db.execute("SELECT stock FROM products WHERE id = 1").fetchone()
         assert product['stock'] == 13
